@@ -59,31 +59,35 @@ class DatabaseSeeder extends Seeder
             ['details' => 'أدخل المبلغ وسيحوّله الوكيل إلى المحفظة المسجّلة.', 'is_active' => true],
         );
 
+        // غيّر الرقم ده لرقم الوكيل الحقيقي لأنه بيظهر للمستخدمين
         Agent::query()->updateOrCreate(
             ['phone' => '01000000000'],
             ['name' => 'وكيل القاهرة', 'note' => 'متاح يومياً من 10 صباحاً حتى 10 مساءً', 'is_active' => true],
         );
 
-        User::query()->updateOrCreate(
-            ['email' => 'admin@daily-tasks.test'],
-            [
-                'name' => 'مدير النظام',
-                'password' => 'password',
-                'is_admin' => true,
-                'balance' => 100,
-                'subscription_id' => $free->id,
-            ],
-        );
+        // الحسابات التجريبية للبيئة المحلية فقط (باسورد معروف، ماتتعملش على الإنتاج)
+        if (app()->environment('local')) {
+            User::query()->updateOrCreate(
+                ['email' => 'admin@daily-tasks.test'],
+                [
+                    'name' => 'مدير النظام',
+                    'password' => 'password',
+                    'is_admin' => true,
+                    'balance' => 100,
+                    'subscription_id' => $free->id,
+                ],
+            );
 
-        User::query()->updateOrCreate(
-            ['email' => 'user@daily-tasks.test'],
-            [
-                'name' => 'مستخدم تجريبي',
-                'password' => 'password',
-                'is_admin' => false,
-                'balance' => 20,
-                'subscription_id' => $free->id,
-            ],
-        );
+            User::query()->updateOrCreate(
+                ['email' => 'user@daily-tasks.test'],
+                [
+                    'name' => 'مستخدم تجريبي',
+                    'password' => 'password',
+                    'is_admin' => false,
+                    'balance' => 20,
+                    'subscription_id' => $free->id,
+                ],
+            );
+        }
     }
 }
