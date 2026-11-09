@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AgentController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\PaymentMethodController;
 use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -37,6 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
     Route::middleware('admin')->group(function () {
+        Route::get('/admin', AdminDashboardController::class)->name('admin.dashboard');
         Route::post('/admin/subscriptions', AdminSubscriptionController::class)->name('admin.subscriptions.store');
         Route::post('/admin/payment-methods', PaymentMethodController::class)->name('admin.payment-methods.store');
         Route::post('/admin/agents', AgentController::class)->name('admin.agents.store');

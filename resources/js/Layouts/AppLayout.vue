@@ -28,6 +28,13 @@ const links = [
                     >
                         {{ link.label }}
                     </Link>
+                    <Link
+                        v-if="user?.is_admin"
+                        href="/admin"
+                        class="rounded-full px-3 py-1.5 text-stone-700 hover:bg-stone-100"
+                    >
+                        لوحة الإدارة
+                    </Link>
                     <span v-if="user" class="px-2 text-stone-500">{{ user.name }}</span>
                     <Link href="/logout" method="post" as="button" class="rounded-full bg-stone-900 px-3 py-1.5 text-white">
                         خروج

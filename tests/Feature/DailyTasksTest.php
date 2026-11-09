@@ -148,6 +148,39 @@ class DailyTasksTest extends TestCase
         $this->assertDatabaseHas('payment_methods', ['name' => 'بطاقة']);
     }
 
+    public function test_admin_dashboard_aggregates_live_member_data(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true, 'balance' => 900]);
+        $activeMember = User::factory()->create(['balance' => 125.50]);
+        $inactiveMember = User::factory()->create(['balance' => 7.25]);
+
+        $activeMember->taskCompletions()->createMany([
+            ['reward_amount' => 0.50, 'completed_at' => now()->startOfDay()->addHour()],
+            ['reward_amount' => 0.50, 'completed_at' => now()->startOfDay()->addHours(2)],
+        ]);
+        $inactiveMember->taskCompletions()->create([
+            'reward_amount' => 0.50,
+            'completed_at' => now()->subDays(31),
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Admin/Dashboard')
+                ->where('metrics.total_users', 2)
+                ->where('metrics.active_users', 1)
+                ->where('metrics.completed_tasks_today', 2)
+                ->where('metrics.total_balance', '132.75'));
+    }
+
+    public function test_member_cannot_view_admin_dashboard(): void
+    {
+        $member = User::factory()->create(['is_admin' => false]);
+
+        $this->actingAs($member)->get('/admin')->assertForbidden();
+    }
+
     private function freePlan(): Subscription
     {
         return Subscription::query()->create([
