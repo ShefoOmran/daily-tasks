@@ -1,7 +1,8 @@
-FROM richarvey/nginx-php-fpm:latest
-COPY . /var/www/html
-ENV APP_ENV=production
-ENV APP_KEY=
-ENV APP_DEBUG=false
-ENV WEBROOT=/var/www/html/public
-ENV RUN_COMPOSER=true
+FROM serversideup/php:8.4-fpm-nginx
+
+ENV APP_ENV=production \
+    APP_DEBUG=false
+
+COPY --chown=www-data:www-data . /var/www/html
+
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
