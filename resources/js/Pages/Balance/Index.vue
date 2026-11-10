@@ -4,7 +4,8 @@ import { computed } from 'vue';
 import AppLayout from '../../Layouts/AppLayout.vue';
 
 const props = defineProps({
-    balance: { type: String, required: true },
+    is_admin: { type: Boolean, required: true },
+    balance: { type: String, default: null },
     methods: { type: Array, required: true },
     agents: { type: Array, required: true },
     transactions: { type: Array, required: true },
@@ -38,12 +39,12 @@ function submitAgent() {
 
 <template>
     <AppLayout>
-        <Head title="الرصيد" />
+        <Head :title="is_admin ? 'إعدادات الدفع' : 'الرصيد'" />
         <div>
-            <h1 class="text-3xl font-semibold">الرصيد</h1>
-            <p class="mt-2 text-stone-600">الرصيد الحالي: <span class="font-semibold text-teal-800">{{ balance }}</span></p>
+            <h1 class="text-3xl font-semibold">{{ is_admin ? 'إعدادات الدفع' : 'الرصيد' }}</h1>
+            <p v-if="!is_admin" class="mt-2 text-stone-600">الرصيد الحالي: <span class="font-semibold text-teal-800">{{ balance }}</span></p>
 
-            <section class="mt-6 grid gap-4 lg:grid-cols-2">
+            <section v-if="!is_admin" class="mt-6 grid gap-4 lg:grid-cols-2">
                 <form class="rounded-2xl border border-stone-200 bg-white p-5" @submit.prevent="submitDeposit">
                     <h2 class="text-lg font-semibold">إيداع</h2>
                     <label class="mt-4 block text-sm">
@@ -84,7 +85,7 @@ function submitAgent() {
                 </form>
             </section>
 
-            <section class="mt-6 rounded-2xl border border-stone-200 bg-white p-5">
+            <section v-if="!is_admin" class="mt-6 rounded-2xl border border-stone-200 bg-white p-5">
                 <h2 class="text-lg font-semibold">الوكلاء</h2>
                 <p v-if="agents.length === 0" class="mt-3 text-sm text-stone-500">لا يوجد وكلاء حالياً.</p>
                 <ul v-else class="mt-3 divide-y divide-stone-100">
@@ -96,7 +97,7 @@ function submitAgent() {
                 </ul>
             </section>
 
-            <section class="mt-6 rounded-2xl border border-stone-200 bg-white p-5">
+            <section v-if="!is_admin" class="mt-6 rounded-2xl border border-stone-200 bg-white p-5">
                 <h2 class="text-lg font-semibold">آخر العمليات</h2>
                 <p v-if="transactions.length === 0" class="mt-3 text-sm text-stone-500">لا توجد عمليات بعد.</p>
                 <table v-else class="mt-3 w-full text-sm">
@@ -119,7 +120,7 @@ function submitAgent() {
                 </table>
             </section>
 
-            <section v-if="$page.props.auth.user?.is_admin" class="mt-6 grid gap-4 lg:grid-cols-2">
+            <section v-if="is_admin" class="mt-6 grid gap-4 lg:grid-cols-2">
                 <form class="rounded-2xl border border-dashed border-teal-300 bg-white p-5" @submit.prevent="submitMethod">
                     <h2 class="text-lg font-semibold">إضافة طريقة دفع</h2>
                     <input v-model="methodForm.name" required placeholder="الاسم" class="mt-4 w-full rounded-lg border border-stone-300 px-3 py-2" />

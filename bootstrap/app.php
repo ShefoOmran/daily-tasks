@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Http\Middleware\EnsureUserIsMember;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
+            'member' => EnsureUserIsMember::class,
         ]);
         $middleware->redirectGuestsTo('/login');
         $middleware->redirectUsersTo('/dashboard');

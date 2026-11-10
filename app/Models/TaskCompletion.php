@@ -6,7 +6,19 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['reward_amount', 'completed_at'])]
+#[Fillable([
+    'task_id',
+    'reward_amount',
+    'started_at',
+    'task_duration_minutes',
+    'completed_at',
+    'status',
+    'submission_text',
+    'submission_file_path',
+    'submitted_at',
+    'reviewed_at',
+    'review_note',
+])]
 class TaskCompletion extends Model
 {
     /**
@@ -16,7 +28,11 @@ class TaskCompletion extends Model
     {
         return [
             'reward_amount' => 'decimal:2',
+            'started_at' => 'datetime',
+            'task_duration_minutes' => 'integer',
             'completed_at' => 'datetime',
+            'submitted_at' => 'datetime',
+            'reviewed_at' => 'datetime',
         ];
     }
 
@@ -26,5 +42,13 @@ class TaskCompletion extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return BelongsTo<Task, $this>
+     */
+    public function task(): BelongsTo
+    {
+        return $this->belongsTo(Task::class);
     }
 }

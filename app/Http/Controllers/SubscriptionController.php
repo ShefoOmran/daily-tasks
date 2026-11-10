@@ -17,24 +17,36 @@ class SubscriptionController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
+        $subscriptions = Subscription::query()
+            ->orderBy('price')
+            ->orderBy('id')
+            ->get()
+            ->map(fn (Subscription $subscription): array => [
+                'id' => $subscription->id,
+                'name' => $subscription->name,
+                'price' => number_format((float) $subscription->price, 2, '.', ''),
+                'daily_task_limit' => $subscription->daily_task_limit,
+                'reward_amount' => number_format((float) $subscription->reward_amount, 2, '.', ''),
+                'duration_minutes' => $subscription->duration_minutes,
+                'is_free' => $subscription->is_free,
+            ]);
+
+        if ($user->is_admin) {
+            return Inertia::render('Subscriptions/Index', [
+                'is_admin' => true,
+                'balance' => null,
+                'current_subscription_id' => null,
+                'subscriptions' => $subscriptions,
+            ]);
+        }
+
         $freePlan = Subscription::freePlan();
 
         return Inertia::render('Subscriptions/Index', [
+            'is_admin' => false,
             'balance' => number_format((float) $user->balance, 2, '.', ''),
             'current_subscription_id' => $user->subscription_id ?? $freePlan->id,
-            'subscriptions' => Subscription::query()
-                ->orderBy('price')
-                ->orderBy('id')
-                ->get()
-                ->map(fn (Subscription $subscription): array => [
-                    'id' => $subscription->id,
-                    'name' => $subscription->name,
-                    'price' => number_format((float) $subscription->price, 2, '.', ''),
-                    'daily_task_limit' => $subscription->daily_task_limit,
-                    'reward_amount' => number_format((float) $subscription->reward_amount, 2, '.', ''),
-                    'duration_minutes' => $subscription->duration_minutes,
-                    'is_free' => $subscription->is_free,
-                ]),
+            'subscriptions' => $subscriptions,
         ]);
     }
 

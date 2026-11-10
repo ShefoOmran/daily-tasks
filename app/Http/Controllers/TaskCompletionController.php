@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\RedirectResponse;
+use App\Models\Task;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 class TaskCompletionController extends Controller
 {
-    public function __invoke(Request $request): RedirectResponse
+    public function __invoke(Request $request, Task $task): Response
     {
-        $request->user()->completeAvailableTask();
+        $request->user()->visitTask($task);
 
-        return redirect()->route('dashboard')->with('success', 'تم إنجاز المهمة وإضافة الربح إلى الرصيد.');
+        return Inertia::location($task->external_url);
     }
 }

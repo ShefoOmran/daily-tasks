@@ -73,8 +73,8 @@ class DatabaseSeeder extends Seeder
                     'name' => 'مدير النظام',
                     'password' => 'password',
                     'is_admin' => true,
-                    'balance' => 100,
-                    'subscription_id' => $free->id,
+                    'balance' => 0,
+                    'subscription_id' => null,
                 ],
             );
 

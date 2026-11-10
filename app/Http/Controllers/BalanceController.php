@@ -15,18 +15,23 @@ class BalanceController extends Controller
     {
         $user = $request->user();
 
+        if ($user->is_admin) {
+            return Inertia::render('Balance/Index', [
+                'is_admin' => true,
+                'balance' => null,
+                'methods' => $this->paymentMethods(),
+                'agents' => Agent::query()
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->get(['id', 'name', 'phone', 'note']),
+                'transactions' => [],
+            ]);
+        }
+
         return Inertia::render('Balance/Index', [
+            'is_admin' => false,
             'balance' => number_format((float) $user->balance, 2, '.', ''),
-            'methods' => PaymentMethod::query()
-                ->where('is_active', true)
-                ->orderBy('name')
-                ->get()
-                ->map(fn (PaymentMethod $method): array => [
-                    'id' => $method->id,
-                    'name' => $method->name,
-                    'type' => $method->type->value,
-                    'details' => $method->details,
-                ]),
+            'methods' => $this->paymentMethods(),
             'agents' => Agent::query()
                 ->where('is_active', true)
                 ->orderBy('name')
@@ -49,5 +54,20 @@ class BalanceController extends Controller
                     'created_at' => $transaction->created_at->timezone(config('app.timezone'))->format('Y-m-d H:i'),
                 ]),
         ]);
+    }
+
+    private function paymentMethods(): array
+    {
+        return PaymentMethod::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get()
+            ->map(fn (PaymentMethod $method): array => [
+                'id' => $method->id,
+                'name' => $method->name,
+                'type' => $method->type->value,
+                'details' => $method->details,
+            ])
+            ->all();
     }
 }

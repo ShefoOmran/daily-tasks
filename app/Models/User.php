@@ -21,6 +21,16 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    protected static function booted(): void
+    {
+        static::saving(function (User $user): void {
+            if ($user->is_admin) {
+                $user->balance = 0;
+                $user->subscription_id = null;
+            }
+        });
+    }
+
     /**
      * @return array<string, string>
      */
@@ -77,7 +87,7 @@ class User extends Authenticatable
 
     public function nextTaskAvailableAt(): ?Carbon
     {
-        $latest = $this->taskCompletions()->latest('completed_at')->first();
+        $latest = $this->taskCompletions()->whereNotNull('completed_at')->latest('completed_at')->first();
 
         if ($latest === null) {
             return null;
@@ -88,10 +98,17 @@ class User extends Authenticatable
         return $availableAt->isFuture() ? $availableAt : null;
     }
 
-    public function completeAvailableTask(): TaskCompletion
+    public function visitTask(Task $task): TaskCompletion
     {
-        return DB::transaction(function (): TaskCompletion {
+        return DB::transaction(function () use ($task): TaskCompletion {
             $user = static::query()->whereKey($this->id)->lockForUpdate()->firstOrFail();
+
+            if ($user->is_admin) {
+                throw ValidationException::withMessages([
+                    'task' => 'حساب المدير مخصص للإدارة ولا يمكنه تنفيذ المهام.',
+                ]);
+            }
+
             $plan = $user->plan();
             $completedToday = $user->taskCompletions()->whereDate('completed_at', today())->count();
 
@@ -101,20 +118,31 @@ class User extends Authenticatable
                 ]);
             }
 
-            $latest = $user->taskCompletions()->latest('completed_at')->first();
+            $nextTaskAt = $user->nextTaskAvailableAt();
 
-            if ($latest !== null && $latest->completed_at->copy()->addMinutes($plan->duration_minutes)->isFuture()) {
+            if ($nextTaskAt?->isFuture()) {
                 throw ValidationException::withMessages([
-                    'task' => 'انتظر حتى ينتهي وقت المهمة الحالية.',
+                    'task' => 'انتظر حتى ينتهي الفاصل المحدد في اشتراكك.',
+                ]);
+            }
+
+            $activeTask = Task::query()->whereKey($task->getKey())->where('is_active', true)->first();
+
+            if ($activeTask === null || blank($activeTask->external_url)) {
+                throw ValidationException::withMessages([
+                    'task' => 'هذه المهمة غير متاحة حالياً أو لم يتم ضبط رابطها.',
                 ]);
             }
 
             $completion = $user->taskCompletions()->create([
-                'reward_amount' => $plan->reward_amount,
+                'task_id' => $activeTask->id,
+                'reward_amount' => $activeTask->reward_amount,
+                'started_at' => now(),
+                'task_duration_minutes' => $activeTask->duration_minutes,
                 'completed_at' => now(),
+                'status' => 'completed',
             ]);
-
-            $user->increment('balance', $plan->reward_amount);
+            $user->increment('balance', $activeTask->reward_amount);
 
             return $completion;
         });

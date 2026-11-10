@@ -43,6 +43,27 @@ defineProps({
             <section class="mt-9">
                 <h2 class="text-lg font-semibold text-stone-900">إجراءات الإدارة</h2>
                 <div class="mt-3 divide-y divide-stone-200 border-y border-stone-200">
+                    <Link href="/admin/users" class="flex items-center justify-between gap-4 py-4 hover:text-teal-800">
+                        <span>
+                            <span class="block font-medium">إدارة المستخدمين</span>
+                            <span class="mt-1 block text-sm text-stone-500">عرض الأعضاء وتغيير اشتراكاتهم</span>
+                        </span>
+                        <span aria-hidden="true" class="text-xl text-stone-400">‹</span>
+                    </Link>
+                    <Link href="/admin/tasks" class="flex items-center justify-between gap-4 py-4 hover:text-teal-800">
+                        <span>
+                            <span class="block font-medium">إدارة المهام</span>
+                            <span class="mt-1 block text-sm text-stone-500">إضافة المهام وتعديلها وتحديد وقت تنفيذها</span>
+                        </span>
+                        <span aria-hidden="true" class="text-xl text-stone-400">‹</span>
+                    </Link>
+                    <Link href="/admin/task-activity" class="flex items-center justify-between gap-4 py-4 hover:text-teal-800">
+                        <span>
+                            <span class="block font-medium">متابعة تنفيذ المهام</span>
+                            <span class="mt-1 block text-sm text-stone-500">عرض سجل انتقال المستخدمين وروابط المهام</span>
+                        </span>
+                        <span aria-hidden="true" class="text-xl text-stone-400">‹</span>
+                    </Link>
                     <Link href="/subscriptions" class="flex items-center justify-between gap-4 py-4 hover:text-teal-800">
                         <span>
                             <span class="block font-medium">إدارة الاشتراكات</span>
@@ -52,7 +73,7 @@ defineProps({
                     </Link>
                     <Link href="/balance" class="flex items-center justify-between gap-4 py-4 hover:text-teal-800">
                         <span>
-                            <span class="block font-medium">إدارة طرق الدفع والوكلاء</span>
+                            <span class="block font-medium">إعدادات الدفع والوكلاء</span>
                             <span class="mt-1 block text-sm text-stone-500">إضافة طرق دفع ووكلاء جدد</span>
                         </span>
                         <span aria-hidden="true" class="text-xl text-stone-400">‹</span>
